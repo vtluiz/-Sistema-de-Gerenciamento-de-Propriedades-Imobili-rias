@@ -1,0 +1,117 @@
+CREATE DATABASE propriedadesimobiliárias;
+USE propriedadesimobiliárias;
+
+CREATE TABLE Propriedade (
+    id_propriedade INT PRIMARY KEY AUTO_INCREMENT,
+    endereco VARCHAR(255) NOT NULL,
+    cidade VARCHAR(100) NOT NULL,
+    estado VARCHAR(100) NOT NULL,
+    valor_aluguel DECIMAL(10, 2) NOT NULL,
+    id_proprietario INT,
+    FOREIGN KEY (id_proprietario) REFERENCES Proprietario(id_proprietario)
+);
+
+
+CREATE TABLE Proprietario (
+proprietarioID INT PRIMARY KEY AUTO_INCREMENT,
+nome VARCHAR (100) NOT NULL,
+telefone VARCHAR (15),
+email VARCHAR (100)
+);
+
+CREATE TABLE locatario ( 
+locatarioID INT PRIMARY KEY AUTO_INCREMENT,
+nome VARCHAR (100) NOT NULL,
+telefone VARCHAR (15),
+email VARCHAR (100)
+);
+
+CREATE TABLE Contrato (
+    id_contrato INT PRIMARY KEY AUTO_INCREMENT,
+    id_propriedade INT,
+    id_locatario INT,
+    data_inicio DATE NOT NULL,
+    data_fim DATE NOT NULL,
+    valor_aluguel DECIMAL(10, 2) NOT NULL,
+    FOREIGN KEY (id_propriedade) REFERENCES Propriedade(id_propriedade),
+    FOREIGN KEY (id_locatario) REFERENCES Locatario(id_locatario)
+);
+
+CREATE TABLE Pagamento (
+    id_pagamento INT PRIMARY KEY AUTO_INCREMENT,
+    id_contrato INT,
+    data_pagamento DATE NOT NULL,
+    valor_pago DECIMAL(10, 2) NOT NULL,
+    FOREIGN KEY (id_contrato) REFERENCES Contrato(id_contrato)
+);
+
+INSERT INTO Propriedade (endereco, cidade, estado, valor_aluguel, id_proprietario)
+VALUES ('Rua das Flores, 123', 'São Paulo', 'SP', 2500.00, 1);
+
+INSERT INTO Proprietario (nome, telefone, email)
+VALUES ('João Silva', '(11) 99999-9999', 'joao.silva@email.com');
+
+
+INSERT INTO Locatario (nome, telefone, email)
+VALUES ('Maria Oliveira', '(21) 88888-8888', 'maria.oliveira@email.com');
+
+
+INSERT INTO Contrato (id_propriedade, id_locatario, data_inicio, data_fim, valor_aluguel)
+VALUES (1, 1, '2024-09-01', '2025-09-01', 2500.00);
+
+
+INSERT INTO Pagamento (id_contrato, data_pagamento, valor_pago)
+VALUES (1, '2024-09-05', 2500.00);
+
+SELECT * FROM Propriedade;
+
+SELECT P.endereco, P.cidade, P.estado, P.valor_aluguel, Pr.nome AS proprietario
+FROM Propriedade P
+JOIN Proprietario Pr ON P.id_proprietario = Pr.id_proprietario;
+
+SELECT P.endereco, C.data_inicio, C.data_fim, L.nome AS locatario
+FROM Propriedade P
+JOIN Contrato C ON P.id_propriedade = C.id_propriedade
+JOIN Locatario L ON C.id_locatario = L.id_locatario
+WHERE C.data_fim > CURDATE();
+
+SELECT * FROM Locatario;
+
+SELECT Pa.id_pagamento, Pa.data_pagamento, Pa.valor_pago, C.id_contrato, L.nome AS locatario
+FROM Pagamento Pa
+JOIN Contrato C ON Pa.id_contrato = C.id_contrato
+JOIN Locatario L ON C.id_locatario = L.id_locatario;
+
+SELECT P.endereco, P.cidade, P.estado
+FROM Propriedade P
+LEFT JOIN Contrato C ON P.id_propriedade = C.id_propriedade
+WHERE C.id_contrato IS NULL OR C.data_fim < CURDATE();
+
+DELETE FROM Propriedade
+WHERE id_propriedade = 1;
+
+DELETE FROM Propriedade
+WHERE id_proprietario = 1;
+
+DELETE FROM Proprietario
+WHERE id_proprietario = 1;
+
+DELETE FROM Locatario
+WHERE id_locatario = 1;
+
+DELETE FROM Contrato
+WHERE id_contrato = 1;
+
+DELETE FROM Pagamento
+WHERE id_pagamento = 1;
+
+DELETE FROM Contrato
+WHERE data_fim < CURDATE();
+
+DELETE FROM Propriedade
+WHERE id_propriedade NOT IN (
+    SELECT id_propriedade FROM Contrato
+);
+
+
+
